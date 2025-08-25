@@ -5,408 +5,116 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Fastli.pl — Catch the Expert</title>
   <meta name="description" content="Play a quick game to promote Fastli.pl — catch as many expert icons as possible in 30 seconds and receive a discount code!" />
-  <!-- Social preview -->
-  <meta property="og:title" content="Catch the Expert — Fastli.pl" />
-  <meta property="og:description" content="Play for 30 seconds, catch as many experts as you can, and grab your discount code." />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%230f172a'/><stop offset='100%' stop-color='%23172a46'/></linearGradient></defs><rect width='100%' height='100%' fill='url(%23g)'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Inter,Arial,sans-serif' font-size='64' fill='white'>Catch the Expert — Fastli.pl</text></svg>" />
   <style>
-    :root{
-      --bg1:#0f172a; /* slate-900 */
-      --bg2:#1e293b; /* slate-800 */
-      --acc:#00e0b8; /* minty */
-      --acc2:#ffd166; /* warm */
-      --danger:#ff6363;
-      --text:#e2e8f0; /* slate-200 */
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:linear-gradient(135deg,var(--bg1),var(--bg2));color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,'Apple Color Emoji','Segoe UI Emoji'}
-    .wrap{display:grid;place-items:center;min-height:100%;padding:16px}
-    #gameCard{width:min(100%,980px);border-radius:24px;background:rgba(15,23,42,.6);box-shadow:0 10px 30px rgba(0,0,0,.35);backdrop-filter: blur(8px);overflow:hidden;border:1px solid rgba(255,255,255,.06)}
-    header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(255,255,255,.04);border-bottom:1px solid rgba(255,255,255,.06)}
-    header .brand{font-weight:700;letter-spacing:.2px}
-    header .brand b{color:var(--acc)}
-    #hud{display:flex;gap:12px;align-items:center}
-    .pill{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);font-size:14px}
-    .pill .dot{width:8px;height:8px;border-radius:999px;background:var(--acc)}
-    #canvasWrap{position:relative;aspect-ratio:16/9;max-height:70vh}
-    canvas{width:100%;height:100%;display:block;background:radial-gradient(1200px 600px at 20% 30%, rgba(255,255,255,.06), transparent), radial-gradient(800px 400px at 80% 70%, rgba(255,255,255,.05), transparent)}
-    .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:24px}
-    .panel{width:min(680px,100%);padding:24px;border-radius:20px;background:rgba(2,6,23,.8);border:1px solid rgba(255,255,255,.1);backdrop-filter: blur(6px);text-align:center}
-    h1{font-size:clamp(22px,4vw,34px);margin:0 0 6px}
-    p.sub{opacity:.85;margin:0 0 18px}
-    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    button{appearance:none;border:0;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;background:var(--acc);color:#002b28;transition:transform .06s ease, box-shadow .2s ease;box-shadow:0 8px 20px rgba(0,224,184,.24)}
-    button:hover{transform:translateY(-1px)}
-    button.secondary{background:rgba(255,255,255,.1);color:var(--text);box-shadow:none}
-    button.warn{background:var(--danger);color:white}
-    .stat{font-size:14px;opacity:.9}
-    .coupon{font-size:20px;font-weight:800;letter-spacing:.2em;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-    .footer{font-size:12px;opacity:.7;margin-top:10px}
-    .hidden{display:none}
-    /* Small screens */
-    @media (max-width:640px){
-      .grid{grid-template-columns:1fr}
-      header{flex-direction:column;gap:8px}
-    }
+    body { margin:0; font-family:sans-serif; background:#0f172a; color:#fff; text-align:center; }
+    #hud { margin:1em; font-size:18px; }
+    canvas { background:#1e293b; display:block; margin:0 auto; border:2px solid #00e0b8; border-radius:12px; }
+    #overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.7); color:#fff; }
+    #overlay.hidden { display:none; }
+    button { margin:8px; padding:10px 18px; border:0; border-radius:8px; cursor:pointer; font-weight:bold; }
+    .primary { background:#00e0b8; color:#002b28; }
+    .secondary { background:#ff6363; color:#fff; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div id="gameCard">
-      <header>
-        <div class="brand">💚 <span>Fastli.pl</span> — <b>Catch the Expert</b></div>
-        <div id="hud">
-          <div class="pill"><span class="dot"></span><span id="time">00:30</span></div>
-          <div class="pill">🏆 <span id="score">0</span></div>
-          <div class="pill">🎯 <span id="accuracy">0%</span></div>
-        </div>
-      </header>
-      <div id="canvasWrap">
-        <canvas id="gameCanvas" aria-label="Game field: catch expert icons by clicking/tapping" role="img"></canvas>
+  <h1>💚 Fastli.pl — Catch the Expert</h1>
+  <div id="hud">
+    ⏱ <span id="time">30</span>s &nbsp; | &nbsp; 🏆 <span id="score">0</span> pts
+  </div>
+  <canvas id="game" width="600" height="400"></canvas>
 
-        <!-- START OVERLAY -->
-        <div id="startOverlay" class="overlay">
-          <div class="panel">
-            <h1>Catch as many experts as you can in 30 seconds</h1>
-            <p class="sub">Click or tap the moving icons. Each expert gives you points. Avoid red traps — they cost you time!</p>
-            <div class="grid">
-              <button id="btnStart">▶️ Start</button>
-              <button id="btnHow" class="secondary">ℹ️ How to play</button>
-            </div>
-            <div class="footer">Tip: works on mobile — enable sound/fullscreen from your browser if you want.</div>
-          </div>
-        </div>
-
-        <!-- END OVERLAY -->
-        <div id="endOverlay" class="overlay hidden">
-          <div class="panel">
-            <h1>Great job! 🎉</h1>
-            <p class="stat">Your score: <b><span id="finalScore">0</span> pts</b> • Accuracy: <b><span id="finalAcc">0%</span></b></p>
-            <p>Here is your discount code:</p>
-            <p class="coupon" id="coupon">FASTLI10</p>
-            <div class="grid" style="margin-top:12px">
-              <button id="btnCopy">📋 Copy code</button>
-              <button id="btnShare" class="secondary">📣 Share result</button>
-            </div>
-            <div class="grid" style="margin-top:12px">
-              <a id="btnCta" href="https://fastli.pl" target="_blank" rel="noopener noreferrer"><button>🚀 Go to Fastli.pl</button></a>
-              <button id="btnReplay" class="warn">🔄 Play again</button>
-            </div>
-            <div class="footer">The code is fixed (FASTLI10). In production, set its discount rules in your e‑shop / CMS.</div>
-          </div>
-        </div>
-      </div>
+  <div id="overlay">
+    <div>
+      <h2>Catch as many experts as you can in 30 seconds!</h2>
+      <button id="startBtn" class="primary">▶ Start Game</button>
     </div>
   </div>
 
-  <script>
-    // === Game configuration ===
-    const CONFIG = {
-      GAME_DURATION_SEC: 30,
-      START_COUNT: 7,
-      MAX_COUNT: 14,
-      SPEED_MIN: 60,  // px/s
-      SPEED_MAX: 180,
-      SIZE_MIN: 20,
-      SIZE_MAX: 44,
-      BAD_CHANCE: 0.18, // share of traps
-      TIME_PENALTY: 2.5, // seconds lost on trap
-      TIME_BONUS: 1.5, // seconds gained on gold
-      SPAWN_EVERY: 3.5, // how often difficulty ramps up
-      DPR_LIMIT: 2
-    };
+  <div id="end" class="hidden">
+    <h2>🎉 Game Over</h2>
+    <p>Your score: <b id="finalScore">0</b></p>
+    <p>Your discount code:</p>
+    <p style="font-size:22px; font-weight:bold; color:#ffd166;">FASTLI10</p>
+    <button onclick="location.reload()" class="secondary">🔄 Play Again</button>
+    <a href="https://fastli.pl" target="_blank"><button class="primary">🚀 Go to Fastli.pl</button></a>
+  </div>
 
-    const EMOJIS = [
-      '👷', '🛠️', '🔧', '🔨', '🧰', '🪛', '🧹', '💡', '🚿', '🧱', '⚡', '🚪', '🪟', '🧼'
-    ];
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+let objects = [];
+let score = 0;
+let timeLeft = 30;
+let timerId;
+let running = false;
 
-    const GOLD_EMOJI = '⭐'; // time bonus
-    const BAD_EMOJI = '❌';  // trap — takes time
+class Obj {
+  constructor(x,y,dx,dy,emoji){
+    this.x=x; this.y=y; this.dx=dx; this.dy=dy; this.emoji=emoji; this.size=32;
+  }
+  draw(){
+    ctx.font=this.size+"px Arial"; ctx.textAlign="center"; ctx.textBaseline="middle";
+    ctx.fillText(this.emoji,this.x,this.y);
+  }
+  update(){
+    this.x+=this.dx; this.y+=this.dy;
+    if(this.x<20||this.x>canvas.width-20) this.dx*=-1;
+    if(this.y<20||this.y>canvas.height-20) this.dy*=-1;
+    this.draw();
+  }
+  hit(mx,my){ return Math.abs(mx-this.x)<20 && Math.abs(my-this.y)<20; }
+}
 
-    // === State ===
-    let canvas, ctx, w, h, dpr;
-    let objects = []; // items to catch
-    let particles = [];
-    let running = false;
-    let lastTs = 0;
-    let timeLeft = CONFIG.GAME_DURATION_SEC;
-    let score = 0;
-    let clicks = 0, hits = 0;
+function spawn(){
+  const x=Math.random()*canvas.width, y=Math.random()*canvas.height;
+  const dx=(Math.random()*2-1)*3, dy=(Math.random()*2-1)*3;
+  const emoji="👷";
+  objects.push(new Obj(x,y,dx,dy,emoji));
+}
 
-    // UI
-    const elTime = document.getElementById('time');
-    const elScore = document.getElementById('score');
-    const elAcc = document.getElementById('accuracy');
-    const startOverlay = document.getElementById('startOverlay');
-    const endOverlay = document.getElementById('endOverlay');
-    const finalScore = document.getElementById('finalScore');
-    const finalAcc = document.getElementById('finalAcc');
-    const couponEl = document.getElementById('coupon');
+function draw(){
+  if(!running) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  objects.forEach(o=>o.update());
+  requestAnimationFrame(draw);
+}
 
-    // === Entities ===
-    class Item{
-      constructor(x,y,vx,vy,size,emoji,type='good'){
-        this.x=x;this.y=y;this.vx=vx;this.vy=vy;this.size=size;this.emoji=emoji;this.type=type;this.spin=(Math.random()*2-1)*0.8;
-        this.value = Math.round(10 + (size<30?8:0) + Math.random()*6);
-      }
-      update(dt){
-        this.x += this.vx*dt; this.y += this.vy*dt;
-        // bounce
-        if(this.x < this.size){this.x=this.size; this.vx*=-1}
-        if(this.x > w - this.size){this.x=w - this.size; this.vx*=-1}
-        if(this.y < this.size){this.y=this.size; this.vy*=-1}
-        if(this.y > h - this.size){this.y=h - this.size; this.vy*=-1}
-      }
-      draw(){
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.spin*0.1);
-        ctx.font = `${this.size}px system-ui,Segoe UI Emoji,Apple Color Emoji`;
-        ctx.textAlign='center';
-        ctx.textBaseline='middle';
-        ctx.shadowColor = this.type==='bad' ? 'rgba(255,0,0,.4)' : (this.type==='gold' ? 'rgba(255,215,0,.35)' : 'rgba(0,224,184,.25)');
-        ctx.shadowBlur = 18;
-        ctx.fillText(this.emoji,0,0);
-        ctx.restore();
-      }
-      contains(px,py){
-        const dx=px-this.x, dy=py-this.y; return (dx*dx+dy*dy) <= (this.size*0.8)*(this.size*0.8);
-      }
+canvas.addEventListener("click", e=>{
+  if(!running) return;
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  for(let i=0;i<objects.length;i++){
+    if(objects[i].hit(mx,my)){
+      score+=10;
+      objects.splice(i,1);
+      spawn();
+      document.getElementById("score").textContent=score;
+      break;
     }
+  }
+});
 
-    class Particle{ // small circles after hit
-      constructor(x,y){
-        this.x=x; this.y=y; this.vx=(Math.random()*2-1)*140; this.vy=(Math.random()*2-1)*140; this.life=0.5; this.r=2+Math.random()*3;
-      }
-      update(dt){this.life-=dt; this.x+=this.vx*dt; this.y+=this.vy*dt}
-      draw(){
-        ctx.save();
-        ctx.globalAlpha = Math.max(this.life,0);
-        const g = ctx.createRadialGradient(this.x,this.y,0,this.x,this.y,this.r*2);
-        g.addColorStop(0,'rgba(0,224,184,.9)');
-        g.addColorStop(1,'rgba(0,224,184,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(this.x,this.y,this.r*2,0,Math.PI*2); ctx.fill();
-        ctx.restore();
-      }
-    }
+function startGame(){
+  document.getElementById("overlay").classList.add("hidden");
+  running=true;
+  score=0; timeLeft=30; objects=[];
+  document.getElementById("score").textContent=0;
+  document.getElementById("time").textContent=timeLeft;
+  for(let i=0;i<5;i++) spawn();
+  draw();
+  timerId=setInterval(()=>{
+    timeLeft--; document.getElementById("time").textContent=timeLeft;
+    if(timeLeft<=0) endGame();
+  },1000);
+}
 
-    function spawnOne(){
-      // random type: normal, gold (bonus), or bad (trap)
-      const roll = Math.random();
-      const type = roll < CONFIG.BAD_CHANCE ? 'bad' : (roll > 0.92 ? 'gold' : 'good');
-      const emoji = type==='bad' ? BAD_EMOJI : (type==='gold' ? GOLD_EMOJI : EMOJIS[Math.floor(Math.random()*EMOJIS.length)]);
-      const size = rand(CONFIG.SIZE_MIN, CONFIG.SIZE_MAX);
-      const speed = rand(CONFIG.SPEED_MIN, CONFIG.SPEED_MAX);
-      // spawn with a random direction
-      const angle = Math.random()*Math.PI*2;
-      const vx = Math.cos(angle)*speed; const vy = Math.sin(angle)*speed;
-      const margin = 40;
-      const x = rand(margin, w-margin);
-      const y = rand(margin, h-margin);
-      objects.push(new Item(x,y,vx,vy,size,emoji,type));
-    }
+function endGame(){
+  running=false; clearInterval(timerId);
+  document.getElementById("finalScore").textContent=score;
+  document.getElementById("end").classList.remove("hidden");
+}
 
-    function ensureCount(target){
-      while(objects.length < target) spawnOne();
-    }
-
-    function rand(min,max){return Math.random()*(max-min)+min}
-
-    // draw subtle grid background
-    function drawBg(){
-      ctx.save();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = 'rgba(255,255,255,.05)';
-      const step = 40;
-      for(let x=0;x<w;x+=step){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke()}
-      for(let y=0;y<h;y+=step){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
-      ctx.restore();
-    }
-
-    function formatTime(t){
-      const s = Math.max(0, Math.ceil(t));
-      return `00:${s.toString().padStart(2,'0')}`;
-    }
-
-    function updateHUD(){
-      elTime.textContent = formatTime(timeLeft);
-      elScore.textContent = score;
-      const acc = clicks>0 ? Math.round((hits/clicks)*100) : 0;
-      elAcc.textContent = acc+"%";
-    }
-
-    function tick(ts){
-      if(!running){ lastTs = ts; return requestAnimationFrame(tick); }
-      const dt = Math.min(0.033, (ts - lastTs)/1000 || 0); // clamp dt
-      lastTs = ts;
-
-      // game logic
-      timeLeft -= dt;
-      const targetCount = Math.min(CONFIG.MAX_COUNT, CONFIG.START_COUNT + Math.floor((CONFIG.GAME_DURATION_SEC - timeLeft)/CONFIG.SPAWN_EVERY));
-      ensureCount(targetCount);
-
-      for(const o of objects) o.update(dt);
-      for(const p of particles) p.update(dt);
-      particles = particles.filter(p=>p.life>0);
-
-      // draw
-      ctx.clearRect(0,0,w,h);
-      drawBg();
-      for(const o of objects) o.draw();
-      for(const p of particles) p.draw();
-
-      updateHUD();
-
-      if(timeLeft <= 0){
-        endGame();
-        return; // do not continue animation — endGame will unpause on replay
-      }
-
-      requestAnimationFrame(tick);
-    }
-
-    function onPointer(ev){
-      if(!running) return;
-      clicks++;
-      const rect = canvas.getBoundingClientRect();
-      const px = (ev.clientX - rect.left) * (canvas.width / rect.width);
-      const py = (ev.clientY - rect.top) * (canvas.height / rect.height);
-      // because we draw with DPR scaling, convert to logical space
-      const scale = dpr; const x = px/scale, y = py/scale;
-
-      // find the first top-most hit
-      for(let i=objects.length-1;i>=0;i--){
-        const o = objects[i];
-        if(o.contains(x,y)){
-          hits++;
-          popAt(o.x,o.y);
-          if(o.type==='bad'){
-            timeLeft = Math.max(0, timeLeft - CONFIG.TIME_PENALTY);
-            flash('#ff6363');
-          } else {
-            const bonus = o.type==='gold' ? 12 : o.value; // gold = big score bonus
-            score += bonus;
-            if(o.type==='gold'){
-              timeLeft = Math.min(CONFIG.GAME_DURATION_SEC+3, timeLeft + CONFIG.TIME_BONUS);
-              flash('#ffd166');
-            }
-          }
-          objects.splice(i,1); // remove hit object
-          return; // only one object per click
-        }
-      }
-      // miss — light effect
-      popAt(x,y, true);
-    }
-
-    function popAt(x,y,miss=false){
-      const n = miss?6:12;
-      for(let i=0;i<n;i++){ particles.push(new Particle(x,y)); }
-    }
-
-    function flash(color){
-      // quick background flash using overlay shadow
-      const wrap = document.getElementById('canvasWrap');
-      wrap.style.boxShadow = `inset 0 0 0 9999px ${hexToRgba(color,0.08)}`;
-      setTimeout(()=>{wrap.style.boxShadow='none'},120);
-    }
-
-    function hexToRgba(hex,a){
-      const r = parseInt(hex.slice(1,3),16);
-      const g = parseInt(hex.slice(3,5),16);
-      const b = parseInt(hex.slice(5,7),16);
-      return `rgba(${r},${g},${b},${a})`;
-    }
-
-    function startGame(){
-      startOverlay.classList.add('hidden');
-      endOverlay.classList.add('hidden');
-      running = true; timeLeft = CONFIG.GAME_DURATION_SEC; score = 0; clicks = 0; hits = 0; objects = []; particles=[]; lastTs=performance.now();
-      ensureCount(CONFIG.START_COUNT);
-      requestAnimationFrame(tick);
-    }
-
-    function endGame(){
-      running = false;
-      updateHUD();
-      finalScore.textContent = score;
-      finalAcc.textContent = clicks? Math.round((hits/clicks)*100)+"%": '0%';
-      couponEl.textContent = 'FASTLI10';
-      endOverlay.classList.remove('hidden');
-    }
-
-    function copyCoupon(){
-      const code = couponEl.textContent.trim();
-      navigator.clipboard?.writeText(code).then(()=>toast('Code copied ✔')).catch(()=>toast('Copy manually: '+code));
-    }
-
-    function shareResult(){
-      const shareData = {
-        title: 'Catch the Expert — Fastli.pl',
-        text: `I just scored ${score} pts in Fastli's game! Try to beat me 🔥`,
-        url: location.href
-      };
-      if(navigator.share){ navigator.share(shareData).catch(()=>{}); }
-      else{
-        const text = `${shareData.title}
-${shareData.text}
-${shareData.url}`;
-        navigator.clipboard?.writeText(text);
-        toast('Share text copied 📋');
-      }
-    }
-
-    function toast(msg){
-      const t = document.createElement('div');
-      t.textContent = msg;
-      t.style.position='fixed'; t.style.left='50%'; t.style.bottom='24px'; t.style.transform='translateX(-50%)';
-      t.style.background='rgba(0,0,0,.7)'; t.style.color='white'; t.style.padding='10px 14px'; t.style.borderRadius='12px'; t.style.fontWeight='700'; t.style.zIndex='9999';
-      document.body.appendChild(t); setTimeout(()=>{t.remove()},1600);
-    }
-
-    function resize(){
-      const wrap = document.getElementById('canvasWrap');
-      const rect = wrap.getBoundingClientRect();
-      w = Math.max(320, Math.floor(rect.width));
-      h = Math.max(180, Math.floor(rect.height));
-      // DPI scaling
-      dpr = Math.min(CONFIG.DPR_LIMIT, window.devicePixelRatio || 1);
-      canvas.width = Math.floor(w * dpr);
-      canvas.height = Math.floor(h * dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0); // scale
-    }
-
-    function init(){
-      canvas = document.getElementById('gameCanvas');
-      ctx = canvas.getContext('2d');
-      resize();
-      window.addEventListener('resize', resize);
-      canvas.addEventListener('pointerdown', onPointer);
-      document.getElementById('btnStart').addEventListener('click', startGame);
-      document.getElementById('btnHow').addEventListener('click', ()=>{
-        alert('Rules:\n• You have 30 seconds.\n• Click/tap expert/tool icons to score points.\n• Gold star adds time & more points.\n• Red X is a trap — it costs time!');
-      });
-      document.getElementById('btnCopy').addEventListener('click', copyCoupon);
-      document.getElementById('btnShare').addEventListener('click', shareResult);
-      document.getElementById('btnReplay').addEventListener('click', startGame);
-      // Pre-fill CTA with UTM (adjust if needed)
-      const cta = document.getElementById('btnCta');
-      try{
-        const url = new URL(cta.getAttribute('href'));
-        url.searchParams.set('utm_source','game');
-        url.searchParams.set('utm_medium','social');
-        url.searchParams.set('utm_campaign','catch-the-expert');
-        cta.setAttribute('href', url.toString());
-      }catch{}
-
-      updateHUD();
-      requestAnimationFrame(tick);
-    }
-
-    // boot
-    window.addEventListener('DOMContentLoaded', init);
-  </script>
+document.getElementById("startBtn").addEventListener("click",startGame);
+</script>
 </body>
 </html>
